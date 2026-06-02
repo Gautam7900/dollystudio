@@ -26,16 +26,7 @@ CREATE TABLE IF NOT EXISTS orders (
     notes TEXT
 )
 ''')
-    # c.execute('''CREATE TABLE IF NOT EXISTS payments (
-    #     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #     order_id INTEGER,
-    #     total REAL,
-    #     advance REAL,
-    #     remaining REAL,
-    #     payment_mode TEXT,
-    #     payment_status TEXT,
-    # payment_date TEXT
-    # )''')
+
     
     c.execute('''
 CREATE TABLE IF NOT EXISTS payments (
@@ -83,39 +74,67 @@ def login():
     return render_template('login.html')
 
 
-# @app.route('/')
-# def index():
-#     if 'user' not in session:
-#         return redirect(url_for('login'))
-#     conn = sqlite3.connect('studio.db')
-#     c = conn.cursor()
-#     customers = c.execute("SELECT * FROM customers").fetchall()
-#     orders = c.execute("SELECT * FROM orders").fetchall()
-#     payments = c.execute("SELECT * FROM payments").fetchall()
-#     conn.close()
-#     return render_template('index.html', customers=customers, orders=orders, payments=payments)
-
 @app.route('/')
 def index():
+
     if 'user' not in session:
         return redirect(url_for('login'))
 
     conn = sqlite3.connect('studio.db')
     c = conn.cursor()
 
-    customers = c.execute("SELECT * FROM customers").fetchall()
-    orders = c.execute("SELECT * FROM orders").fetchall()
-    payments = c.execute("SELECT * FROM payments").fetchall()
+    # Total Customers
+    total_customers = c.execute("""
+        SELECT COUNT(*)
+        FROM customers
+    """).fetchone()[0]
+
+    # Total Orders
+    total_orders = c.execute("""
+        SELECT COUNT(*)
+        FROM orders
+    """).fetchone()[0]
+
+    # Pending Orders
+    pending_orders = c.execute("""
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status != 'Delivered'
+    """).fetchone()[0]
+
+    # Outstanding Amount
+    total_due = c.execute("""
+        SELECT COALESCE(SUM(remaining_amount),0)
+        FROM payments
+    """).fetchone()[0]
+
+    # Recent Orders
+    recent_orders = c.execute("""
+        SELECT
+            o.id,
+            c.name,
+            o.shoot_type,
+            o.date
+
+        FROM orders o
+
+        LEFT JOIN customers c
+        ON o.customer_id = c.id
+
+        ORDER BY o.id DESC
+        LIMIT 5
+    """).fetchall()
 
     conn.close()
 
     return render_template(
         'index.html',
-        customers=customers,
-        orders=orders,
-        payments=payments
+        total_customers=total_customers,
+        total_orders=total_orders,
+        pending_orders=pending_orders,
+        total_due=total_due,
+        recent_orders=recent_orders
     )
-
 
 @app.route('/logout')
 def logout():
@@ -209,16 +228,6 @@ def delete_customer(id):
 
 
 
-# @app.route('/orders')
-# def orders():
-#     if 'user' not in session:
-#         return redirect(url_for('login'))
-#     conn = sqlite3.connect('studio.db')
-#     c = conn.cursor()
-#     orders = c.execute("SELECT * FROM orders").fetchall()
-#     conn.close()
-#     return render_template('orders.html', orders=orders)
-
 
 @app.route('/orders')
 def orders():
@@ -288,16 +297,6 @@ def orders():
         orders=orders,
         search_query=search_query
     )
-# @app.route('/add_order', methods=['POST'])
-# def add_order():
-#     conn = sqlite3.connect('studio.db')
-#     c = conn.cursor()
-#     c.execute("INSERT INTO orders (customer_id, shoot_type, date, delivery_date, status) VALUES (?, ?, ?, ?, ?)",
-#               (request.form['customer_id'], request.form['shoot_type'], request.form['date'], request.form['delivery_date'], request.form['status']))
-#     conn.commit()
-#     conn.close()
-#     return redirect(url_for('index'))
-
 
 @app.route('/add_order', methods=['POST'])
 def add_order():
@@ -418,16 +417,6 @@ def delete_order(id):
 
 
 
-# @app.route('/payments')
-# def payments():
-#     if 'user' not in session:
-#         return redirect(url_for('login'))
-#     conn = sqlite3.connect('studio.db')
-#     c = conn.cursor()
-#     payments = c.execute("SELECT * FROM payments").fetchall()
-#     conn.close()
-#     return render_template('payments.html', payments=payments)
-
 @app.route('/payments')
 def payments():
 
@@ -476,20 +465,6 @@ def payments():
         payments=payments,
         orders=orders
     )
-
-
-# @app.route('/add_payment', methods=['POST'])
-# def add_payment():
-#     total = float(request.form['total'])
-#     advance = float(request.form['advance'])
-#     remaining = total - advance
-#     conn = sqlite3.connect('studio.db')
-#     c = conn.cursor()
-#     c.execute("INSERT INTO payments (order_id, total, advance, remaining, payment_mode) VALUES (?, ?, ?, ?, ?)",
-#               (request.form['order_id'], total, advance, remaining, request.form['payment_mode']))
-#     conn.commit()
-#     conn.close()
-#     return redirect(url_for('index'))
 
 
 @app.route('/add_transaction', methods=['POST'])
