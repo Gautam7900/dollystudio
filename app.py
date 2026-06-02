@@ -303,8 +303,7 @@ def add_order():
 
     conn = sqlite3.connect('studio.db')
     c = conn.cursor()
-    if total_amount <= 0:
-        return "Amount must be greater than zero"
+    
     c.execute("""
         INSERT INTO orders
         (
