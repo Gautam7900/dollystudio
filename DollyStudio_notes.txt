@@ -1,0 +1,138 @@
+DOLLY PHOTO STUDIO - DEVELOPMENT NOTES
+
+1.  CODE CHANGE RULE
+
+-   Python run (python app.py): Changes show instantly.
+-   EXE: Changes will NOT reflect automatically.
+-   Setup: Also needs rebuild after EXE update.
+
+2.  AFTER ANY CODE CHANGE
+
+3.  Run python app.py (test)
+
+4.  Delete build & dist folder
+
+5.  Rebuild EXE using PyInstaller
+
+6.  Rebuild Setup using Inno Setup
+
+7.  IMPORTANT WARNINGS
+
+-   Do NOT keep app running while rebuilding EXE
+-   Do NOT install while app is open
+
+4.  COMMON ERRORS & FIXES
+
+-   Access denied (static): Remove os.makedirs(“static”)
+-   Session error: Add app.secret_key
+-   Readonly database: Use AppData folder for DB
+
+5.  DATABASE LOCATION C:.db
+
+6.  BEST PRACTICE
+
+-   Keep backup of database
+-   Test in python before making EXE
+-   Always rebuild EXE after changes
+
+7.  FINAL FLOW Code Change → Test → EXE Build → Setup Build
+
+— END —
+
+
+
+
+
+
+
+
+
+🎯 🧠 CODE CHANGE KARNE PE KYA HOTA HAI?
+
+👉 Short answer:
+
+❌ EXE auto update nahi hota
+❌ Setup auto update nahi hota
+✔ Sirf Python run me change dikhega
+
+🧩 3 SITUATION SAMJH LO
+🥇 1. Python run (python app.py)
+
+👉 Agar tum code change karte ho:
+
+✔ change turant dikhega
+✔ koi problem nahi
+
+👉 Example:
+
+new button add
+route change
+UI change
+
+👉 sab instantly reflect ✔
+
+🥇 2. EXE file (important 🔥)
+
+👉 Agar tum code change karte ho:
+
+❌ EXE me change nahi dikhega
+
+👉 kyun?
+
+👉 EXE = old code ka snapshot
+
+🔥 FIX
+
+👉 har change ke baad:
+
+rmdir /s /q build
+rmdir /s /q dist
+py -3.10 -m PyInstaller --onefile --noconsole ^
+--add-data "templates;templates" ^
+--add-data "static;static" ^
+--name=DollyStudio app.py
+
+👉 nayi EXE banani padegi ✔
+
+🥇 3. Setup (installer)
+
+👉 Agar tumne EXE update ki:
+
+❌ purana setup outdated ho jayega
+
+👉 isliye:
+
+👉 naya setup bhi banana padega ✔
+
+🎯 FINAL FLOW (YAAD RAKHNA)
+
+👉 jab bhi code change karo:
+
+1. Code change
+2. python app.py → test ✔
+3. EXE rebuild ✔
+4. Setup rebuild ✔
+⚠️ KYA PROBLEM AA SAKTI HAI
+Change type	Problem
+Database change	data mismatch
+Route change	404 error
+Static path change	images load nahi
+Secret key change	login reset
+DB location change	old data nahi dikhega
+💡 PRO TIP (IMPORTANT)
+
+👉 Always backup DB:
+
+C:\Users\YourName\AppData\Roaming\DollyStudio\studio.db
+🚀 BEST PRACTICE
+
+👉 2 version rakho:
+
+Type	Use
+Python version	development
+EXE version	final use
+🏆 FINAL LINE
+
+👉 Code change = new EXE + new Setup compulsory 🔥
+
+

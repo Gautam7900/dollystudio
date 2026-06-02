@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+
+# Database
+studio.db
+
+# PyInstaller
+build/
+dist/
+output/
+
+# VS Code
+.vscode/
+
+# Environment
+venv/
+.env
+
+# Uploads (optional)
+uploads/*
+!uploads/.gitkeep

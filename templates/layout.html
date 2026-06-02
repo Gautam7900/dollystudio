@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{% block title %}Dolly Photo Studio CMS{% endblock %}</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      body {
+        background: #0d0d0d;
+        color: white;
+      }
+
+      .container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar */
+
+      .sidebar {
+        width: 260px;
+        background: #080808;
+        border-right: 1px solid #222;
+        padding: 25px;
+
+        position: sticky;
+        top: 0;
+        height: 100vh;
+      }
+
+      .logo {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .logo img {
+        width: 120px;   
+      }
+
+      .logo h2 {
+        color: #ff6600;
+        margin-top: 10px;
+      }
+
+      .menu a {
+        display: block;
+        color: white;
+        text-decoration: none;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        transition: 0.3s;
+      }
+
+      .menu a:hover {
+        background: #ff6600;
+      }
+
+      .quote {
+        margin-top: 100px;
+        background: #111;
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid #222;
+      }
+
+      .quote h3 {
+        color: #ff6600;
+      }
+
+      .main {
+        flex: 1;
+        padding: 30px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        background: #1b1b1b;
+        color: white;
+      }
+
+      button {
+        background: #ff6600;
+        color: white;
+        border: none;
+        padding: 14px 25px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      button:hover {
+        background: #ff5500;
+      }
+
+      @media (max-width: 900px) {
+        .container {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+        }
+      }
+
+      .menu-toggle {
+        display: none;
+
+        position: fixed;
+
+        top: 15px;
+        left: 15px;
+
+        z-index: 2000;
+
+        background: #ff6600;
+
+        color: white;
+
+        border: none;
+
+        padding: 12px 15px;
+
+        border-radius: 10px;
+
+        cursor: pointer;
+      }
+
+      /* Overlay */
+
+      .overlay {
+        display: none;
+
+        position: fixed;
+
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        background: rgba(0, 0, 0, 0.6);
+
+        z-index: 999;
+      }
+
+      @media (max-width: 768px) {
+        .menu-toggle {
+          display: block;
+        }
+
+        .sidebar {
+          position: fixed;
+
+          left: -280px;
+
+          top: 0;
+
+          width: 260px;
+
+          height: 100vh;
+
+          z-index: 1000;
+
+          transition: 0.3s ease;
+        }
+
+        .sidebar.active {
+          left: 0;
+        }
+
+        .overlay.show {
+          display: block;
+        }
+
+        .main {
+          width: 100%;
+
+          margin-left: 0;
+
+          padding: 70px 15px 15px;
+        }
+      }
+    </style>
+
+    {% block page_css %} {% endblock %}
+  </head>
+
+  <body>
+    <button class="menu-toggle" onclick="toggleSidebar()">
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="container">
+      <div class="sidebar" id="sidebar">
+        <div class="logo">
+          <img src="/static/logo.png" alt="Logo" />
+          <h2>Dolly Studio</h2>
+        </div>
+
+        <div class="menu">
+          <a href="{{ url_for('index') }}">
+            <i class="fa fa-home"></i> Dashboard
+          </a>
+
+          <a href="{{ url_for('customers') }}">
+            <i class="fa fa-users"></i> Customers
+          </a>
+
+          <a href="{{ url_for('orders') }}">
+            <i class="fa fa-clipboard-list"></i> Orders
+          </a>
+
+          <a href="{{ url_for('payments') }}">
+            <i class="fa fa-money-bill"></i> Payments
+          </a>
+
+          <a href="#"> <i class="fa fa-chart-line"></i> Reports </a>
+
+          <a href="#"> <i class="fa fa-gear"></i> Settings </a>
+        </div>
+
+        <div class="quote">
+          <h3>📸 Capture Moments</h3>
+          <p>Create memories that last forever.</p>
+        </div>
+      </div>
+      <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+      <div class="main">{% block content %} {% endblock %}</div>
+    </div>
+
+    <script>
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("active");
+
+        document.getElementById("overlay").classList.toggle("show");
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,226 @@
+{# <!DOCTYPE html>
+<html>
+<head>
+    <title>Dolly Photo Studio CMS</title>
+</head>
+<body>
+    <h1>Dolly Photo Studio</h1>
+    <img src="/static/logo.png" width="200"><br><br>
+
+    <h2>Add Customer</h2>
+    <form method="POST" action="/add_customer">
+        <input name="name" placeholder="Name" required>
+        <input name="phone" placeholder="Phone" required>
+        <input name="address" placeholder="Address">
+        <input name="email" placeholder="Email">
+        <button>Add</button>
+    </form>
+
+    <h2>Add Order</h2>
+    <form method="POST" action="/add_order">
+        <input name="customer_id" placeholder="Customer ID">
+        <input name="shoot_type" placeholder="Shoot Type">
+        <input name="date" placeholder="Date">
+        <input name="delivery_date" placeholder="Delivery Date">
+        <input name="status" placeholder="Status">
+        <button>Add</button>
+    </form>
+
+    <h2>Add Payment</h2>
+    <form method="POST" action="/add_payment">
+        <input name="order_id" placeholder="Order ID">
+        <input name="total" placeholder="Total">
+        <input name="advance" placeholder="Advance">
+        <input name="payment_mode" placeholder="Cash/UPI">
+        <button>Add</button>
+    </form>
+</body>
+</html> #}
+
+
+
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_css %}
+
+<style>
+
+.hero{
+    background:linear-gradient(
+    rgba(0,0,0,.7),
+    rgba(0,0,0,.7)),
+    url('/static/studio.jpg');
+
+    background-size:cover;
+    background-position:center;
+
+    padding:60px;
+    border-radius:20px;
+    text-align:center;
+}
+
+.hero h1{
+    font-size:60px;
+}
+
+.hero span{
+    color:#ff6600;
+}
+
+.hero p{
+    margin-top:15px;
+    color:#ddd;
+    font-size:22px;
+}
+
+.card{
+    background:#111;
+    border:1px solid #222;
+    border-radius:20px;
+    padding:25px;
+    margin-top:25px;
+}
+
+.card h2{
+    color:#ff6600;
+    margin-bottom:20px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+}
+
+.footer{
+    margin-top:25px;
+    background:#111;
+    border-radius:15px;
+    text-align:center;
+    padding:20px;
+    color:#aaa;
+}
+
+.footer h3{
+    color:#ff6600;
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="hero">
+    <h1><span>DOLLY</span> PHOTO STUDIO</h1>
+    <p>Studio Management System</p>
+</div>
+
+<div class="card">
+
+    <h2>
+        <i class="fa fa-users"></i>
+        Add Customer
+    </h2>
+
+    <form method="POST" action="/add_customer">
+
+        <div class="form-grid">
+
+            <input name="name" placeholder="Customer Name" required>
+
+            <input name="phone" placeholder="Phone Number" required>
+
+            <input name="address" placeholder="Address">
+
+            <input name="email" placeholder="Email">
+
+        </div>
+
+        <br>
+
+        <button type="submit">
+            Add Customer
+        </button>
+
+    </form>
+
+</div>
+
+<div class="card">
+
+    <h2>
+        <i class="fa fa-cart-shopping"></i>
+        Add Order
+    </h2>
+
+    <form method="POST" action="/add_order">
+
+        <div class="form-grid">
+
+            <input name="customer_id" placeholder="Customer ID">
+
+            <input name="shoot_type" placeholder="Shoot Type">
+
+            <input type="date" name="date">
+
+            <input type="date" name="delivery_date">
+
+            <input name="status" placeholder="Status">
+
+        </div>
+
+        <br>
+
+        <button type="submit">
+            Add Order
+        </button>
+
+    </form>
+
+</div>
+
+<div class="card">
+
+    <h2>
+        <i class="fa fa-money-bill"></i>
+        Add Payment
+    </h2>
+
+    <form method="POST" action="/add_payment">
+
+        <div class="form-grid">
+
+            <input name="order_id" placeholder="Order ID">
+
+            <input name="total" placeholder="Total Amount">
+
+            <input name="advance" placeholder="Advance Amount">
+
+            <select name="payment_mode">
+                <option>Cash</option>
+                <option>UPI</option>
+                <option>Card</option>
+                <option>Bank Transfer</option>
+            </select>
+
+        </div>
+
+        <br>
+
+        <button type="submit">
+            Add Payment
+        </button>
+
+    </form>
+
+</div>
+
+<div class="footer">
+    <h3>Dolly Photo Studio</h3>
+    <p>Thank you for trusting us with your memories.</p>
+</div>
+
+{% endblock %}

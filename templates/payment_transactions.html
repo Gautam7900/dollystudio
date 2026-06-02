@@ -1,0 +1,224 @@
+{% extends "layout.html" %}
+
+{% block title %}Payment History{% endblock %}
+
+{% block page_css %}
+
+<style>
+
+.page-header{
+    margin-bottom:25px;
+}
+
+.page-header h1{
+    font-size:32px;
+    color:#ff6600;
+}
+
+.page-header p{
+    color:#999;
+}
+
+.summary-card{
+    background:#111;
+    border:1px solid #222;
+    border-radius:20px;
+    padding:25px;
+    margin-bottom:25px;
+}
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.summary-item{
+    background:#1b1b1b;
+    padding:20px;
+    border-radius:15px;
+}
+
+.summary-item h3{
+    color:#ff6600;
+    margin-bottom:10px;
+    font-size:16px;
+}
+
+.summary-item p{
+    font-size:24px;
+    font-weight:bold;
+}
+
+.timeline{
+    position:relative;
+    margin-top:20px;
+}
+
+.timeline::before{
+    content:'';
+    position:absolute;
+    left:20px;
+    top:0;
+    bottom:0;
+    width:3px;
+    background:#ff6600;
+}
+
+.transaction-card{
+    position:relative;
+    margin-left:60px;
+    margin-bottom:25px;
+    background:#111;
+    border:1px solid #222;
+    border-radius:20px;
+    padding:20px;
+}
+
+.transaction-card::before{
+    content:'';
+    position:absolute;
+    left:-50px;
+    top:25px;
+    width:16px;
+    height:16px;
+    background:#ff6600;
+    border-radius:50%;
+}
+
+.amount{
+    font-size:28px;
+    color:#ff6600;
+    font-weight:bold;
+}
+
+.badge{
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:20px;
+    margin-top:10px;
+    background:#222;
+}
+
+.notes{
+    margin-top:15px;
+    color:#bbb;
+}
+
+.empty{
+    text-align:center;
+    padding:50px;
+    color:#888;
+}
+
+@media(max-width:768px){
+
+.transaction-card{
+    margin-left:40px;
+}
+
+.timeline::before{
+    left:10px;
+}
+
+.transaction-card::before{
+    left:-35px;
+}
+
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+```
+<h1>
+    Payment History
+</h1>
+
+<p>
+    Track all transactions for this studio order.
+</p>
+```
+
+</div>
+
+<div class="summary-card">
+
+```
+<div class="summary-grid">
+
+    <div class="summary-item">
+        <h3>Total Transactions</h3>
+        <p>{{ transactions|length }}</p>
+    </div>
+
+    <div class="summary-item">
+        <h3>Latest Payment</h3>
+
+        {% if transactions %}
+            <p>₹{{ transactions[0][2] }}</p>
+        {% else %}
+            <p>₹0</p>
+        {% endif %}
+    </div>
+
+</div>
+```
+
+</div>
+
+<div class="timeline">
+
+{% if transactions %}
+
+```
+{% for transaction in transactions %}
+
+<div class="transaction-card">
+
+    <div class="amount">
+        ₹{{ transaction[2] }}
+    </div>
+
+    <div class="badge">
+        {{ transaction[3] }}
+    </div>
+
+    <p style="margin-top:15px;">
+        <strong>Date:</strong>
+        {{ transaction[4] }}
+    </p>
+
+    <div class="notes">
+        {{ transaction[5] }}
+    </div>
+
+</div>
+
+{% endfor %}
+```
+
+{% else %}
+
+```
+<div class="empty">
+
+    <h3>No Transactions Found</h3>
+
+    <p>
+        No payment history available for this order.
+    </p>
+
+</div>
+```
+
+{% endif %}
+
+</div>
+
+{% endblock %}

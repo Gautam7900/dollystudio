@@ -1,0 +1,288 @@
+{% extends "layout.html" %} {% block title %}Orders{% endblock %} {% block
+page_css %}
+
+<style>
+  .page-header {
+    margin-bottom: 25px;
+  }
+
+  .page-header h1 {
+    color: #ff6600;
+    font-size: 32px;
+  }
+
+  .page-header p {
+    color: #999;
+  }
+
+  .card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 18px;
+    padding: 25px;
+    margin-bottom: 25px;
+  }
+
+  .card h2 {
+    color: #ff6600;
+    margin-bottom: 20px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background: #1b1b1b;
+    color: white;
+  }
+
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: #ff6600;
+  }
+
+  .btn {
+    background: #ff6600;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    background: #e65c00;
+  }
+
+  .search-box {
+    display: flex;
+    gap: 10px;
+  }
+
+  .search-box input {
+    flex: 1;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    background: #ff6600;
+    color: white;
+    padding: 15px;
+    text-align: left;
+  }
+
+  td {
+    padding: 15px;
+    border-bottom: 1px solid #222;
+  }
+
+  tr:hover {
+    background: #181818;
+  }
+
+  .delete-btn {
+    background: #dc3545;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+  }
+
+  .status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .pending {
+    background: #ffc107;
+    color: black;
+  }
+
+  .editing {
+    background: #0dcaf0;
+    color: black;
+  }
+
+  .completed {
+    background: #198754;
+  }
+
+  .delivered {
+    background: #6f42c1;
+  }
+</style>
+
+{% endblock %} {% block content %}
+
+<div class="page-header">
+  <h1>Order Management</h1>
+  <p>Create and manage studio orders.</p>
+</div>
+
+<div class="card">
+  ```
+  <h2>
+    <i class="fa fa-camera"></i>
+    Add Order
+  </h2>
+
+  <form method="POST" action="/add_order">
+    <div class="form-grid">
+      <select name="customer_id" required>
+        <option value="">Select Customer</option>
+
+        {% for customer in customers %}
+
+        <option value="{{ customer[0] }}">
+          {{ customer[1] }} - {{ customer[2] }}
+        </option>
+
+        {% endfor %}
+      </select>
+
+      <select name="shoot_type">
+        <option>Wedding</option>
+        <option>Pre-Wedding</option>
+        <option>Birthday</option>
+        <option>Passport Photo</option>
+        <option>Event</option>
+        <option>Album</option>
+        <option>Other</option>
+      </select>
+
+      <input
+        type="number"
+        step="0.01"
+        name="total_amount"
+        placeholder="Total Project Amount"
+        required
+      />
+
+      <input type="date" name="date" />
+
+      <input type="date" name="delivery_date" />
+
+      <select name="status">
+        <option>Pending</option>
+        <option>Editing</option>
+        <option>Completed</option>
+        <option>Delivered</option>
+      </select>
+
+      <input type="text" name="notes" placeholder="Notes" />
+    </div>
+
+    <br />
+
+    <button class="btn">Add Order</button>
+  </form>
+  ```
+</div>
+
+<div class="card">
+  ```
+  <h2>Search Orders</h2>
+
+  <form method="GET">
+    <div class="search-box">
+      <input
+        type="text"
+        name="search"
+        value="{{ search_query }}"
+        placeholder="Search Customer"
+      />
+
+      <button class="btn">Search</button>
+    </div>
+  </form>
+  ```
+</div>
+
+<div class="card">
+  <h2>Order List</h2>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Shoot Type</th>
+          <th>Total Amount</th>
+          <th>Shoot Date</th>
+          <th>Delivery Date</th>
+          <th>Status</th>
+          <th>Notes</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for order in orders %}
+
+        <tr>
+          <td>{{ order[0] }}</td>
+
+          <td>{{ order[1] }}</td>
+
+          <td>{{ order[2] }}</td>
+
+          <td>₹{{ order[3] }}</td>
+
+          <td>{{ order[4] }}</td>
+
+          <td>{{ order[5] }}</td>
+
+          <td>
+            {% if order[6] == 'Pending' %}
+            <span class="status pending"> Pending </span>
+
+            {% elif order[6] == 'Editing' %}
+            <span class="status editing"> Editing </span>
+
+            {% elif order[6] == 'Completed' %}
+            <span class="status completed"> Completed </span>
+
+            {% elif order[6] == 'Delivered' %}
+            <span class="status delivered"> Delivered </span>
+            {% endif %}
+          </td>
+
+          <td>{{ order[7] }}</td>
+
+          <td>
+            <a href="/order_receipt/{{ order[0] }}" class="btn">
+              <i class="fa fa-print"></i>
+              Receipt
+            </a>
+
+          
+          </td>
+        </tr>
+
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

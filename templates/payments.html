@@ -1,0 +1,319 @@
+{% extends "layout.html" %}
+
+{% block title %}Payments{% endblock %}
+
+{% block page_css %}
+
+<style>
+
+.page-header{
+    margin-bottom:25px;
+}
+
+.page-header h1{
+    color:#ff6600;
+    font-size:32px;
+}
+
+.page-header p{
+    color:#999;
+}
+
+.card{
+    background:#111;
+    border:1px solid #222;
+    border-radius:18px;
+    padding:25px;
+    margin-bottom:25px;
+}
+
+.card h2{
+    color:#ff6600;
+    margin-bottom:20px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
+
+input,
+select{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    border:1px solid #333;
+    background:#1b1b1b;
+    color:white;
+}
+
+input:focus,
+select:focus{
+    outline:none;
+    border-color:#ff6600;
+}
+
+.btn{
+    background:#ff6600;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:10px;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+}
+
+.btn:hover{
+    background:#e65c00;
+}
+
+.search-box{
+    display:flex;
+    gap:10px;
+}
+
+.search-box input{
+    flex:1;
+}
+
+.table-container{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#ff6600;
+    color:white;
+    padding:15px;
+    text-align:left;
+}
+
+td{
+    padding:15px;
+    border-bottom:1px solid #222;
+}
+
+tr:hover{
+    background:#181818;
+}
+
+.delete-btn{
+    background:#dc3545;
+    color:white;
+    padding:8px 14px;
+    border-radius:8px;
+    text-decoration:none;
+}
+
+.status{
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.paid{
+    background:#198754;
+    color:white;
+}
+
+.partial{
+    background:#ffc107;
+    color:black;
+}
+
+.due{
+    background:#dc3545;
+    color:white;
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Payment Management</h1>
+    <p>Manage studio payments and pending balances.</p>
+</div>
+
+<!-- Add Payment -->
+
+<div class="card">
+
+    <h2>
+        <i class="fa fa-money-bill"></i>
+        Add Payment
+    </h2>
+
+    <form method="POST" action="/add_transaction">
+
+        <div class="form-grid">
+
+            <select name="payment_id" required>
+
+                <option value="">
+                    Select Order
+                </option>
+
+                {% for payment in payments %}
+
+                <option value="{{ payment[0] }}">
+
+                    {{ payment[1] }}
+                    -
+                    {{ payment[2] }}
+                    -
+                    Total ₹{{ payment[3] }}
+                    -
+                    Due ₹{{ payment[5] }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <input
+                type="number"
+                step="0.01"
+                name="amount"
+                placeholder="Amount Received"
+                required>
+
+            <select name="payment_mode">
+
+                <option>Cash</option>
+                <option>UPI</option>
+                <option>Card</option>
+                <option>Bank Transfer</option>
+
+            </select>
+
+            <input
+                type="date"
+                name="payment_date"
+                required>
+
+            <input
+                type="text"
+                name="notes"
+                placeholder="Payment Notes">
+
+        </div>
+
+        <br>
+
+        <button class="btn">
+            Add Payment
+        </button>
+
+    </form>
+
+</div>
+
+<!-- Payment Summary -->
+
+<div class="card">
+
+    <h2>
+        Payment Summary
+    </h2>
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Shoot Type</th>
+                    <th>Total Amount</th>
+                    <th>Paid Amount</th>
+                    <th>Remaining</th>
+                    <th>Status</th>
+                    <th>History</th>
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for payment in payments %}
+
+                <tr>
+
+                    <td>{{ payment[0] }}</td>
+
+                    <td>{{ payment[1] }}</td>
+
+                    <td>{{ payment[2] }}</td>
+
+                    <td>₹{{ payment[3] }}</td>
+
+                    <td>₹{{ payment[4] }}</td>
+
+                    <td>₹{{ payment[5] }}</td>
+
+                    <td>
+
+                        {% if payment[6] == 'Paid' %}
+
+                            <span class="status paid">
+                                Paid
+                            </span>
+
+                        {% elif payment[6] == 'Partial' %}
+
+                            <span class="status partial">
+                                Partial
+                            </span>
+
+                        {% else %}
+
+                            <span class="status due">
+                                Due
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a href="/payment_transactions/{{ payment[0] }}"
+                           class="btn">
+
+                            View
+
+                        </a>
+
+                    </td>
+
+                 
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
