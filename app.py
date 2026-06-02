@@ -303,7 +303,7 @@ def add_order():
 
     conn = sqlite3.connect('studio.db')
     c = conn.cursor()
-    
+
     c.execute("""
         INSERT INTO orders
         (
@@ -467,78 +467,23 @@ def payments():
     )
 
 
-@app.route('/add_transaction/<int:payment_id>', methods=['POST'])
-def add_transaction(payment_id):
+@app.route('/add_transaction', methods=['POST'])
+def add_transaction():
 
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    payment_id = int(request.form['payment_id'])
 
     amount = float(request.form['amount'])
-    payment_mode = request.form['payment_mode']
+
+    mode = request.form['payment_mode']
+
     payment_date = request.form['payment_date']
+
     notes = request.form['notes']
 
     conn = sqlite3.connect('studio.db')
     c = conn.cursor()
 
-    # Get Payment Details
-
-    payment = c.execute("""
-        SELECT
-            order_id,
-            total_amount,
-            paid_amount
-        FROM payments
-        WHERE id=?
-    """, (payment_id,)).fetchone()
-
-    order_id = payment[0]
-    total_amount = float(payment[1])
-    old_paid_amount = float(payment[2])
-
-    # Calculate New Amounts
-
-    new_paid_amount = old_paid_amount + amount
-
-    remaining_amount = total_amount - new_paid_amount
-
-    # Auto Update Status
-
-    if remaining_amount <= 0:
-
-        remaining_amount = 0
-        payment_status = "Paid"
-
-        # Order Automatically Completed
-
-        c.execute("""
-            UPDATE orders
-            SET status='Completed'
-            WHERE id=?
-        """, (order_id,))
-
-    else:
-
-        payment_status = "Partial"
-
-    # Update Payment Summary
-
-    c.execute("""
-        UPDATE payments
-        SET
-            paid_amount=?,
-            remaining_amount=?,
-            payment_status=?
-        WHERE id=?
-    """,
-    (
-        new_paid_amount,
-        remaining_amount,
-        payment_status,
-        payment_id
-    ))
-
-    # Save Transaction History
+    # Save transaction
 
     c.execute("""
         INSERT INTO payment_transactions
@@ -554,9 +499,51 @@ def add_transaction(payment_id):
     (
         payment_id,
         amount,
-        payment_mode,
+        mode,
         payment_date,
         notes
+    ))
+
+    # Get payment summary
+
+    payment = c.execute("""
+        SELECT
+            total_amount,
+            paid_amount
+        FROM payments
+        WHERE id=?
+    """,
+    (payment_id,)
+    ).fetchone()
+
+    total = float(payment[0])
+    current_paid = float(payment[1])
+
+    new_paid = current_paid + amount
+
+    remaining = total - new_paid
+
+    if remaining <= 0:
+        remaining = 0
+        status = "Paid"
+    else:
+        status = "Partial"
+
+    # Update payment summary
+
+    c.execute("""
+        UPDATE payments
+        SET
+            paid_amount=?,
+            remaining_amount=?,
+            payment_status=?
+        WHERE id=?
+    """,
+    (
+        new_paid,
+        remaining,
+        status,
+        payment_id
     ))
 
     conn.commit()
