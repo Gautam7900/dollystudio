@@ -4,6 +4,17 @@ import sqlite3
 app = Flask(__name__)
 app.secret_key = "dollystudio123"
 
+
+
+@app.after_request
+def add_header(response):
+
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
+
 def init_db():
     conn = sqlite3.connect('studio.db')
     c = conn.cursor()
@@ -182,6 +193,8 @@ def logout():
 
 @app.route('/customers')
 def customers():
+    if 'user' not in session:
+        return redirect(url_for('login'))
 
     search_query = request.args.get('search', '')
 
@@ -266,6 +279,8 @@ def delete_customer(id):
 
 @app.route('/orders')
 def orders():
+    if 'user' not in session:
+        return redirect(url_for('login'))
 
     search_query = request.args.get('search', '')
 
