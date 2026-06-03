@@ -467,8 +467,96 @@ def payments():
     )
 
 
+# @app.route('/add_transaction', methods=['POST'])
+# def add_transaction():
+
+#     payment_id = int(request.form['payment_id'])
+
+#     amount = float(request.form['amount'])
+
+#     mode = request.form['payment_mode']
+
+#     payment_date = request.form['payment_date']
+
+#     notes = request.form['notes']
+
+#     conn = sqlite3.connect('studio.db')
+#     c = conn.cursor()
+
+#     # Save transaction
+
+#     c.execute("""
+#         INSERT INTO payment_transactions
+#         (
+#             payment_id,
+#             amount,
+#             payment_mode,
+#             payment_date,
+#             notes
+#         )
+#         VALUES (?,?,?,?,?)
+#     """,
+#     (
+#         payment_id,
+#         amount,
+#         mode,
+#         payment_date,
+#         notes
+#     ))
+
+#     # Get payment summary
+
+#     payment = c.execute("""
+#         SELECT
+#             total_amount,
+#             paid_amount
+#         FROM payments
+#         WHERE id=?
+#     """,
+#     (payment_id,)
+#     ).fetchone()
+
+#     total = float(payment[0])
+#     current_paid = float(payment[1])
+
+#     new_paid = current_paid + amount
+
+#     remaining = total - new_paid
+
+#     if remaining <= 0:
+#         remaining = 0
+#         status = "Paid"
+#     else:
+#         status = "Partial"
+
+#     # Update payment summary
+
+#     c.execute("""
+#         UPDATE payments
+#         SET
+#             paid_amount=?,
+#             remaining_amount=?,
+#             payment_status=?
+#         WHERE id=?
+#     """,
+#     (
+#         new_paid,
+#         remaining,
+#         status,
+#         payment_id
+#     ))
+
+#     conn.commit()
+#     conn.close()
+
+#     return redirect(url_for('payments'))
+
+
 @app.route('/add_transaction', methods=['POST'])
 def add_transaction():
+
+    if 'user' not in session:
+        return redirect(url_for('login'))
 
     payment_id = int(request.form['payment_id'])
 
@@ -483,7 +571,7 @@ def add_transaction():
     conn = sqlite3.connect('studio.db')
     c = conn.cursor()
 
-    # Save transaction
+    # Save Transaction History
 
     c.execute("""
         INSERT INTO payment_transactions
@@ -504,10 +592,11 @@ def add_transaction():
         notes
     ))
 
-    # Get payment summary
+    # Get Payment Summary + Order ID
 
     payment = c.execute("""
         SELECT
+            order_id,
             total_amount,
             paid_amount
         FROM payments
@@ -516,20 +605,39 @@ def add_transaction():
     (payment_id,)
     ).fetchone()
 
-    total = float(payment[0])
-    current_paid = float(payment[1])
+    order_id = payment[0]
+
+    total_amount = float(payment[1])
+
+    current_paid = float(payment[2])
+
+    # Calculate New Payment
 
     new_paid = current_paid + amount
 
-    remaining = total - new_paid
+    remaining = total_amount - new_paid
+
+    # Payment Status
 
     if remaining <= 0:
-        remaining = 0
-        status = "Paid"
-    else:
-        status = "Partial"
 
-    # Update payment summary
+        remaining = 0
+
+        payment_status = "Paid"
+
+        # Auto Update Order Status
+
+        c.execute("""
+            UPDATE orders
+            SET status='Completed'
+            WHERE id=?
+        """, (order_id,))
+
+    else:
+
+        payment_status = "Partial"
+
+    # Update Payment Summary
 
     c.execute("""
         UPDATE payments
@@ -542,7 +650,7 @@ def add_transaction():
     (
         new_paid,
         remaining,
-        status,
+        payment_status,
         payment_id
     ))
 
@@ -550,6 +658,10 @@ def add_transaction():
     conn.close()
 
     return redirect(url_for('payments'))
+
+
+
+
 
 @app.route('/payment_transactions/<int:payment_id>')
 def payment_transactions(payment_id):
