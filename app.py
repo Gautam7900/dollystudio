@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 import sqlite3
+from flask import make_response
 
 app = Flask(__name__)
 app.secret_key = "dollystudio123"
@@ -9,7 +10,11 @@ app.secret_key = "dollystudio123"
 @app.after_request
 def add_header(response):
 
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.cache_control.no_store = True
+    response.cache_control.no_cache = True
+    response.cache_control.must_revalidate = True
+    response.cache_control.max_age = 0
+
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
 
@@ -70,17 +75,24 @@ init_db()
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
+    if 'user' in session:
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
+
         username = request.form['username']
         password = request.form['password']
 
-        # Default Credentials
         if username == "admin" and password == "admin123":
+
             session['user'] = username
+
             return redirect(url_for('index'))
-        else:
-            return render_template('login.html',
-                                   error="Invalid Username or Password")
+
+        return render_template(
+            'login.html',
+            error="Invalid Username or Password"
+        )
 
     return render_template('login.html')
 
