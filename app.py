@@ -84,37 +84,66 @@ def index():
     c = conn.cursor()
 
     # Total Customers
+
     total_customers = c.execute("""
         SELECT COUNT(*)
         FROM customers
     """).fetchone()[0]
 
     # Total Orders
+
     total_orders = c.execute("""
         SELECT COUNT(*)
         FROM orders
     """).fetchone()[0]
 
     # Pending Orders
+
     pending_orders = c.execute("""
         SELECT COUNT(*)
         FROM orders
-        WHERE status != 'Delivered'
+        WHERE status IN ('Pending','Editing')
+    """).fetchone()[0]
+
+    # Completed Orders
+
+    completed_orders = c.execute("""
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status='Completed'
+    """).fetchone()[0]
+
+    # Delivered Orders
+
+    delivered_orders = c.execute("""
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status='Delivered'
     """).fetchone()[0]
 
     # Outstanding Amount
+
     total_due = c.execute("""
         SELECT COALESCE(SUM(remaining_amount),0)
         FROM payments
     """).fetchone()[0]
 
+    # Revenue Received
+
+    total_revenue = c.execute("""
+        SELECT COALESCE(SUM(paid_amount),0)
+        FROM payments
+    """).fetchone()[0]
+
     # Recent Orders
+
     recent_orders = c.execute("""
         SELECT
             o.id,
             c.name,
             o.shoot_type,
-            o.date
+            o.date,
+            o.status
 
         FROM orders o
 
@@ -132,9 +161,15 @@ def index():
         total_customers=total_customers,
         total_orders=total_orders,
         pending_orders=pending_orders,
+        completed_orders=completed_orders,
+        delivered_orders=delivered_orders,
         total_due=total_due,
+        total_revenue=total_revenue,
         recent_orders=recent_orders
     )
+    
+    
+    
 
 @app.route('/logout')
 def logout():
